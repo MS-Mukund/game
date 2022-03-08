@@ -46,13 +46,10 @@ class King():
         for id in ids:
             for b in vill.buildings:
                 if(b.id == id):
-                    b.health -= self.attack
-                    if(b.health <= 0):
-                        vill.buildings.remove(b)
-                        vill.grid[b.y][b.x] = 0
-                        break
-
-                        
+                    value = b.reduce_health(self.attack)
+                    
+                    if value == True:
+                        vill.rm_build(b)                    
         
 
     def move(self, vill):

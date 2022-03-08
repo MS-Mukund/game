@@ -1,3 +1,4 @@
+from distutils.command.build import build
 import imp
 from colorama import Fore, Back, Style, init
 init()
@@ -12,12 +13,27 @@ import random
 
 # objects required
 from king import King
-from town_hall import THall
-from huts import Hut
-from walls import Walls
+from building import Building
 from spawn import Spawn_pt
 from cannon import Cannon
 
+# town hall props
+th_w = 4
+th_h = 3
+th_maxh = 100
+th_pix = Back.GREEN + ' ' + Style.RESET_ALL
+
+# hut props
+hut_w = 3
+hut_h = 2
+hut_maxh = 40
+hut_pix = Back.GREEN + ' ' + Style.RESET_ALL
+
+# wall props
+wall_w = 1
+wall_h = 1
+wall_maxh = 15
+wall_pix = Back.WHITE + ' ' + Style.RESET_ALL
 
 class Vill():
 
@@ -51,31 +67,30 @@ class Vill():
         self.spawn_pts = [ Spawn_pt(spawn_loc[i]) for i in range(self.num_spawn_pts) ]
 
         # hall 
-        hall_loc = (self.cols//2, self.rows//2, 1)
-        self.town_hall = THall(hall_loc[0], hall_loc[1], hall_loc[2])
+        build_loc = [ (self.cols//2, self.rows//2, 1) ]
+        self.buildings = [ Building( loc, th_w, th_h, th_pix, th_maxh, th_maxh ) for loc in build_loc ]
         
         # huts
         self.num_huts = 5
-        hut_loc = [ ( (self.cols - 8)//4, (self.rows + self.sc_bd_ht - 8)//2, 2 ), ( 3*(self.cols)//4, (self.rows + self.sc_bd_ht - 8)//2, 3 ) ]
+        build_loc = build_loc + [ ( (self.cols - 8)//4, (self.rows + self.sc_bd_ht - 8)//2, 2 ), ( 3*(self.cols)//4, (self.rows + self.sc_bd_ht - 8)//2, 3 ) ]
 
         for i in range(0, self.num_huts - 2):
-            hut_loc.append( ( (i+1)*(self.cols//(self.num_huts - 1)), 3*(self.rows//4), i + 4 ) ) 
-            
-        self.huts = [ Hut(hut) for hut in hut_loc ]
+            build_loc.append( ( (i+1)*(self.cols//(self.num_huts - 1)), 3*(self.rows//4), i + 4 ) ) 
+
+        self.buildings = self.buildings + [ Building( loc, hut_w, hut_h, hut_pix, hut_maxh, hut_maxh ) for loc in build_loc[1:] ]
         
         # walls
-        wall_loc = []
         for i in range (4, self.rows - 4 + 1):
-            wall_loc.append( (4, i, self.num_huts + 2 + (i-4)*2) )
-            wall_loc.append( (self.cols - 4, i, self.num_huts + 2 + (i-4)*2 + 1) )
+            build_loc.append( (4, i, self.num_huts + 2 + (i-4)*2) )
+            build_loc.append( (self.cols - 4, i, self.num_huts + 2 + (i-4)*2 + 1) )
             # print( self.num_huts + 2 + (i-4)*2, self.num_huts + 2 + (i-4)*2 + 1 )
 
         for i in range (4, self.cols - 4 ):
-            wall_loc.append( (i, 4, self.num_huts + 2*self.rows - 12 + (i-4)*2) )
-            wall_loc.append( (i, self.rows - 4, self.num_huts + 2*self.rows - 12 + (i-4)*2 + 1) )
+            build_loc.append( (i, 4, self.num_huts + 2*self.rows - 12 + (i-4)*2) )
+            build_loc.append( (i, self.rows - 4, self.num_huts + 2*self.rows - 12 + (i-4)*2 + 1) )
             # print( self.num_huts + 2*self.rows - 12 + (i-4)*2, self.num_huts + 2*self.rows - 12 + (i-4)*2 + 1 )
 
-        self.walls = [ Walls( loc ) for loc in wall_loc ]
+        self.buildings = self.buildings + [ Building( loc, wall_w, wall_h, wall_pix, wall_maxh, wall_maxh ) for loc in build_loc[self.num_huts+1:] ] 
 
         # cannons 
         self.num_cannons = 3
@@ -88,6 +103,13 @@ class Vill():
         # renders the village
         self.render()
     
+    def rm_build(self, b):
+        # remove from grid
+        for r in range(b.y, b.y + b.height):
+                    for c in range(b.x, b.x + b.width):
+                        self.village[r][c] = self.bg_color
+                        self.grid[r][c] = 0
+
     def render(self):
         system('clear')
         self.village = [[self.bg_color for x in range(self.cols)] for y in range(self.rows)]
@@ -98,25 +120,13 @@ class Vill():
                 print(r, c)
                 self.village[r][c] = self.king.pixel
         
-        # render town hall 
-        for r in range(self.town_hall.y, self.town_hall.y + self.town_hall.height):
-            for c in range(self.town_hall.x, self.town_hall.x+self.town_hall.width):
-                self.village[r][c] = self.town_hall.pixel
-                self.grid[r][c] = self.town_hall.id
-
-        # render huts
-        for hut in self.huts:
-            for r in range(hut.y, hut.y + hut.height):
-                for c in range(hut.x, hut.x + hut.width):
-                    self.village[r][c] = hut.pixel
-                    self.grid[r][c] = hut.id
-
-        # render walls
-        for wall in self.walls:
-            for r in range(wall.y, wall.y + wall.height):
-                for c in range(wall.x, wall.x + wall.width):
-                    self.village[r][c] = wall.pixel
-                    self.grid[r][c] = wall.id
+        # render buildings
+        for b in self.buildings:
+            if b.health > 0:
+                for r in range(b.y, b.y + b.height):
+                    for c in range(b.x, b.x + b.width):
+                        self.village[r][c] = b.pixel
+                        self.grid[r][c] = b.id
 
         # render spawn pts
         for spawn_pt in self.spawn_pts:

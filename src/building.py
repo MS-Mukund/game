@@ -7,12 +7,8 @@ import math
 import random 
 
 class Building():
-    def __init__(self, x, y, id, width, height, pixel, max_health, health):
-        self.id = id
-        
-        # location
-        self.x = x
-        self.y = y
+    def __init__(self, tuple, width, height, pixel, max_health, health):
+        self.x, self.y, self.id = tuple
 
         # dimensions
         self.width = width
@@ -24,4 +20,18 @@ class Building():
         # properties
         self.max_health = max_health
         self.health = health
+
+    def reduce_health(self, amount):
+        self.health -= amount
         
+        if(self.health <= 0):
+            self.health = 0
+
+            return True            
+        else:
+            if   self.id <= 6 and self.health < self.max_health//2 and self.health >= self.max_health//5:
+                self.pixel = Back.YELLOW + ' ' + Style.RESET_ALL
+            elif self.id <= 6 and self.health < self.max_health//5:
+                self.pixel = Back.RED    + ' ' + Style.RESET_ALL
+
+            return False
