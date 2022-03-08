@@ -1,0 +1,2 @@
+Some notes: 
+1. id for town hall is 1. Id for huts = 2...num_huts. Id for walls starts from num_huts + 2. 
