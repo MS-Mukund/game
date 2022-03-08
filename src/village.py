@@ -26,7 +26,7 @@ th_pix = Back.GREEN + ' ' + Style.RESET_ALL
 # hut props
 hut_w = 3
 hut_h = 2
-hut_maxh = 40
+hut_maxh = 50
 hut_pix = Back.GREEN + ' ' + Style.RESET_ALL
 
 # wall props
@@ -109,6 +109,8 @@ class Vill():
                     for c in range(b.x, b.x + b.width):
                         self.village[r][c] = self.bg_color
                         self.grid[r][c] = 0
+        
+        self.buildings.remove(b)
 
     def render(self):
         system('clear')
@@ -117,7 +119,7 @@ class Vill():
         # render king
         for r in range(self.king.y, self.king.y+self.king.height):
             for c in range(self.king.x, self.king.x+self.king.width):
-                print(r, c)
+                print(self.grid[r][c])
                 self.village[r][c] = self.king.pixel
         
         # render buildings

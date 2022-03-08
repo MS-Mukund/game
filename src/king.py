@@ -54,62 +54,56 @@ class King():
 
     def move(self, vill):
         char = input_to()
-        if(char == 'd'):
-            if((self.x + self.width) <= (vill.cols - self.speed)): 
-                for sp in range(self.speed): 
-                    if vill.grid[self.y][self.x + self.width] == 0:
-                        self.x += 1
-                    else:
-                        break
-                
-            elif((self.x + self.width) - vill.cols <= 0):   
-                while( self.x < vill.cols - self.width):
-                    if vill.grid[self.y][self.x + self.width] == 0:
-                        self.x += 1
-                    else:
-                        break
+        if(char == 'd'):            
+            for sp in range(self.speed):
+                if(self.x + self.width < vill.cols):
+                    for h in range(self.height):
+                        # print( self.y + h, self.x + self.width)
+                        if vill.grid[self.y + h][self.x + self.width] != 0:
+                            return
+
+                    self.x += 1
 
         elif(char == 'a'):
-            if(self.x >= self.speed):
-                for sp in range(self.speed):
-                    if vill.grid[self.y][self.x - self.width + 1] == 0:
-                        self.x -= 1
-                    else:
-                        break
-            elif (self.x >= 0):  
-                while(self.x > 0):
-                    if vill.grid[self.y][self.x - self.width + 1] == 0:
-                        self.x -= 1
-                    else:
-                        break
+            # if self.x >= self.speed:
+            #     for sp in range(self.speed):
+            #         if vill.grid[self.y][self.x - self.width + 1] == 0:
+            #             self.x -= 1
+            #         else:
+            #             break
+            # elif (self.x >= 0):  
+            #     while(self.x > 0):
+            #         if vill.grid[self.y][self.x - self.width + 1] == 0:
+            #             self.x -= 1
+            #         else:
+            #             break
+
+            for sp in range(self.speed):
+                if self.x > 0:
+                    for h in range(self.height):
+                        if vill.grid[self.y + h][self.x - 1] != 0:
+                            return
+
+                    self.x -= 1
 
         elif(char == 's'):
-            if((self.y + self.height) <= (vill.rows-self.speed)):
-                for sp in range(self.speed):
-                    if vill.grid[self.y + self.height][self.x] == 0:
-                        self.y += 1
-                    else:
-                        break
-            elif((self.y + self.height) - vill.rows <= 0 ):  
-                while( self.y < vill.rows - self.height):
-                    if vill.grid[self.y + self.height][self.x] == 0:
-                        self.y += 1
-                    else:
-                        break
+            for sp in range(self.speed):
+                if( self.y + self.height < vill.rows ):
+                    for w in range(self.width):
+                        if vill.grid[self.y + self.height][self.x + w] != 0:
+                            return
+
+                    self.y += 1
 
         elif(char == 'w'):
-            if(self.y >= self.speed):
-                for sp in range(self.speed):
-                    if vill.grid[self.y - self.height + 1][self.x] == 0:
-                        self.y -= 1
-                    else:
-                        break
-            elif (self.y >= 0): 
-                while( self.y > 0):
-                    if vill.grid[self.y - self.height + 1][self.x] == 0:
-                        self.y -= 1
-                    else:
-                        break
+            for sp in range(self.speed):
+                if self.y > 0:
+                    for w in range(self.width):
+                        if vill.grid[self.y - 1][self.x + w] != 0:
+                            # print(w, vill.grid[self.y - 1][self.x + w])
+                            return
+
+                    self.y -= 1
         
         elif(char == ' '):
             self.v_attack(vill)

@@ -29,9 +29,9 @@ class Building():
 
             return True            
         else:
-            if   self.id <= 6 and self.health < self.max_health//2 and self.health >= self.max_health//5:
+            if   self.id <= 6 and self.health <= self.max_health//2 and self.health > self.max_health//5:
                 self.pixel = Back.YELLOW + ' ' + Style.RESET_ALL
-            elif self.id <= 6 and self.health < self.max_health//5:
+            elif self.id <= 6 and self.health <= self.max_health//5:
                 self.pixel = Back.RED    + ' ' + Style.RESET_ALL
 
             return False
