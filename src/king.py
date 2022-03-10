@@ -22,7 +22,7 @@ class King():
         
         pixel = Back.BLUE + Style.BRIGHT + ' ' + Style.RESET_ALL
         speed = 2
-        attack = 100
+        attack = 10
         
         Troop.__init__(self, x, y, id, width, height, max_h, max_h, pixel, speed, attack)
 
@@ -30,8 +30,8 @@ class King():
 
         ids = set([])
         # scan a 5 tile radius around the king
-        for i in range(self.y - 15, self.y + 26):
-            for j in range(self.x - 15, self.x + 26):
+        for i in range(self.y - 5, self.y + 6):
+            for j in range(self.x - 5, self.x + 6):
                 if(i >= 0 and j >= 0 and i < vill.rows and j < vill.cols):
                     if(vill.grid[i][j] != 0):
                         ids.add(vill.grid[i][j])

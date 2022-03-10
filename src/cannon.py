@@ -14,7 +14,7 @@ pix = Back.MAGENTA + ' ' + Style.RESET_ALL
 max_h = 50
 h = 50
 dam = 2
-range = 9
+range = 7
 
 class Cannon(Building):
     
