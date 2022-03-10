@@ -8,6 +8,7 @@ init()
 import sys
 sys.path.insert(0, './src')
 
+import os
 from os import system
 from time import sleep, time
 import math
@@ -52,6 +53,7 @@ class Vill():
         self.sc_bd_ht = 5   
         self.border = 1
         self.num_spawn_pts = 3
+        self.number_of_files = len( os.listdir('replays') )
 
         self.bar_style = Back.GREEN + Fore.BLACK + Style.BRIGHT + ' ' + Style.RESET_ALL
         # basic timekeeping
@@ -93,13 +95,13 @@ class Vill():
         
         # walls
         for i in range (4, self.rows - 4 + 1):
-            build_loc.append( (self.cols - 4, i, self.num_huts + 2 + (i-4)*2 + 1) )
-            build_loc.append( (4, i, self.num_huts + 2 + (i-4)*2) )
+            build_loc.append( (self.cols - 4, i, len(build_loc) + 1) )
+            build_loc.append( (4, i, len(build_loc) + 1) )
             # print( self.num_huts + 2 + (i-4)*2, self.num_huts + 2 + (i-4)*2 + 1 )
 
         for i in range (4, self.cols - 4 ):
-            build_loc.append( (i, 4, self.num_huts + 2*self.rows - 12 + (i-4)*2) )
-            build_loc.append( (i, self.rows - 4, self.num_huts + 2*self.rows - 12 + (i-4)*2 + 1) )
+            build_loc.append( (i, 4, len(build_loc) + 1) )
+            build_loc.append( (i, self.rows - 4, len(build_loc) + 1) )
             # print( self.num_huts + 2*self.rows - 12 + (i-4)*2, self.num_huts + 2*self.rows - 12 + (i-4)*2 + 1 )
 
         self.buildings = self.buildings + [ Building( loc, wall_w, wall_h, wall_pix, wall_maxh, wall_maxh, wall_dam ) for loc in build_loc[self.num_huts+1:] ] 
@@ -118,7 +120,22 @@ class Vill():
 
         # renders the village
         self.render()
-    
+
+    def add_troop(self, pt):
+        x, y = self.spawn_pts[pt].x, self.spawn_pts[pt].y 
+        id = len(self.troops) + 1
+
+        tr_att = 3
+        tr_sp = 1
+        tr_heal = 15
+
+        tr_wid = 1
+        tr_ht = 1
+
+        barb_pix = Back.RED + Fore.BLACK + ' ' + Style.RESET_ALL
+
+        self.troops.append( Troop(x, y, id, tr_wid, tr_ht, tr_heal, tr_heal, barb_pix, tr_att, tr_sp) )
+
     def rm_build(self, b):
         # remove from grid
         for r in range(b.y, b.y + b.height):
@@ -153,7 +170,6 @@ class Vill():
         for troop in self.troops:
             for r in range(troop.y, troop.y+troop.height):
                 for c in range(troop.x, troop.x+troop.width):
-                    # print(str(troop.pixel), end='')
                     self.village[r][c] = troop.pixel
         
         # render buildings
@@ -222,6 +238,16 @@ class Vill():
 
         print("\n".join(["".join(row) for row in self.output]))
 
+        # sys.path.insert(0, '../replays')
+        replay_f = 'replays/replay' + str(self.number_of_files + 1) + '.txt' 
+        with open(replay_f, 'a+') as f:        
+            for row in self.output:
+                for col in row:
+                    f.write(col)
+                f.write('\n')
+            f.write("\n")
+            f.write("demarcation\n")
+
         if self.game_end ==  0:
             self.cur_t = time()
         else:
@@ -233,6 +259,13 @@ class Vill():
         # for row in self.grid:
         #     print(row)
 
-        # deal damage to buildings
+        # barbarians move to nearest buildings
+        for troop in self.troops[1:]:
+            # print(self.game_end)
+            self.game_end = troop.move_and_attack(self)
+
+            if self.game_end != 0:
+                break
+
         for c in self.cannons:
             c.deal_damage(self)

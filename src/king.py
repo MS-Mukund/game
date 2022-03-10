@@ -150,6 +150,14 @@ class King():
         # heal spell
         elif(char == 'h'):
             [ troop.heal(vill) for troop in vill.troops ]
+        
+        # spawn troops
+        elif(char == '1'):
+            vill.add_troop(0)
+        elif(char == '2'):
+            vill.add_troop(1)
+        elif(char == '3'):
+            vill.add_troop(2)
 
         # self.update_position(self, self.x, self.y)    
         return char    

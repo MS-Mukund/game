@@ -1,4 +1,11 @@
-Some notes: 
-1. id for town hall is 1. Id for huts = 2...num_huts. Id for walls starts from num_huts + 2. 
-2. smol bug there on corner of village wall has to be destroyed twice. 
-3. Cannon always attacks the closest hut.
+## Some notes: 
+
+1. buidling_id for town hall is 1.
+2. building_Id for huts = 2...num_huts. 
+3. building_Id for walls starts from num_huts + 2. 
+3. Cannon always attacks the closest troop.
+4. 'r' triggers rage spell
+5. 'h' triggers heal spell
+6. '1' = spawn at 1st spawn pt
+7. '2' = spawn at 2nd spawn pt
+8. '3' = spawn at spawn 3rd pt
