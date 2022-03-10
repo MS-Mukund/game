@@ -15,33 +15,23 @@ from troop import Troop
 class King():
     
     def __init__(self, x, y):
-        # self.x = x
-        # self.y = y
-
+        
+        id = 1
+        width, height = 2, 2
+        max_h = 100
+        
         pixel = Back.BLUE + Style.BRIGHT + ' ' + Style.RESET_ALL
-        Troop.__init__(self, x, y, 1, 2, 2, 100, 100, pixel)
-
-        # dimensions of king cell
-        # self.id = 1
-        # self.width = 2
-        # self.height = 2
-
-        # color of king
-        # self.pixel = Back.BLUE + Style.BRIGHT + ' ' + Style.RESET_ALL
-
-        # properties of king
-        # self.max_health = 100
-        # self.health = self.max_health
-
-        self.attack = 10
-        self.speed  = 2
+        speed = 2
+        attack = 100
+        
+        Troop.__init__(self, x, y, id, width, height, max_h, max_h, pixel, speed, attack)
 
     def v_attack(self, vill):
 
         ids = set([])
         # scan a 5 tile radius around the king
-        for i in range(self.y - 5, self.y + 6):
-            for j in range(self.x - 5, self.x + 6):
+        for i in range(self.y - 15, self.y + 26):
+            for j in range(self.x - 15, self.x + 26):
                 if(i >= 0 and j >= 0 and i < vill.rows and j < vill.cols):
                     if(vill.grid[i][j] != 0):
                         ids.add(vill.grid[i][j])
@@ -53,11 +43,16 @@ class King():
                     value = b.reduce_health(self.attack)
                     
                     if value == True:
-                        vill.rm_build(b)      
+                        vill.rm_build(b)  
+
+        if len(vill.buildings) == 0 or ( vill.buildings[0].id > 6 and vill.num_cannons <= 0 ): 
+            return 1        # 1 indicates victory
+
+        return 0    
 
     def take_damage(self, amount, vill):
         # print("yes")
-        Troop.take_damage(self, amount)
+        Troop.take_damage(self, amount, vill)
         # print("now")
         
         # update health bar color
@@ -65,6 +60,8 @@ class King():
 
         if(self.health <= 0):
             self.health = 0
+            vill.bar_style = Back.YELLOW + Fore.YELLOW + ' ' + Style.RESET_ALL
+            vill.rm_troop(self.id)
         else:
             # print("nani " + str(self.health))
             if   self.health <= self.max_health//2 and self.health > self.max_health//5:
@@ -72,8 +69,13 @@ class King():
             elif self.health <= self.max_health//5:
                 vill.bar_style = Back.RED + Fore.BLACK + ' ' + Style.RESET_ALL
 
-        # print("what")              
+        # print("what") 
+
+    def rage(self, vill):
+        Troop.rage(self, vill)             
         
+    def heal(self, vill):
+        Troop.heal(self, vill)
 
     def move(self, vill):
         char = input_to()
@@ -129,11 +131,25 @@ class King():
                     self.y -= 1
         
         elif(char == ' '):
-            self.v_attack(vill)
+            vill.game_end = self.v_attack(vill)
 
         elif(char == 'q'):
             print('Quitting...')
             exit()
-        
+
+        elif(char == 'p'):
+            print('Pausing...')
+            system('clear')
+            print(len(vill.buildings))
+            sleep(1)
+
+        # rage spell
+        elif(char == 'r'):
+            [ troop.rage(vill) for troop in vill.troops ]
+
+        # heal spell
+        elif(char == 'h'):
+            [ troop.heal(vill) for troop in vill.troops ]
+
         # self.update_position(self, self.x, self.y)    
         return char    

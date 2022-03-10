@@ -14,7 +14,7 @@ pix = Back.MAGENTA + ' ' + Style.RESET_ALL
 max_h = 50
 h = 50
 dam = 2
-range = 7
+range = 9
 
 class Cannon(Building):
     
@@ -52,7 +52,7 @@ class Cannon(Building):
                 # print(min_d, index)
 
         if(index != -1 and index != 1):
-            vill.troops[index-1].take_damage(self.damage)
+            vill.troops[index-1].take_damage(self.damage, vill)
         
         elif index == 1:
             vill.king.take_damage(self.damage, vill)

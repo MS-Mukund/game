@@ -40,6 +40,8 @@ wall_maxh = 15
 wall_pix = Back.WHITE + ' ' + Style.RESET_ALL
 wall_dam = 0
 
+no_of_cannons = 3
+
 class Vill():
 
     def __init__(self):
@@ -47,7 +49,7 @@ class Vill():
         # dimensions of the village
         self.rows = 40
         self.cols = 90
-        self.sc_bd_ht = 8
+        self.sc_bd_ht = 5   
         self.border = 1
         self.num_spawn_pts = 3
 
@@ -61,7 +63,7 @@ class Vill():
         self.borders  = Back.YELLOW + ' ' + Style.RESET_ALL
 
         # checking end of game
-        self.game_end = False
+        self.game_end = 0
 
         # troops in general
         self.troops = []
@@ -103,12 +105,13 @@ class Vill():
         self.buildings = self.buildings + [ Building( loc, wall_w, wall_h, wall_pix, wall_maxh, wall_maxh, wall_dam ) for loc in build_loc[self.num_huts+1:] ] 
 
         # cannons 
-        self.num_cannons = 3
+        self.num_cannons = no_of_cannons
         tmp = len(build_loc) + 1
         cannon_loc = [ ( 4 + (i+1)*(self.cols - 8)//(self.num_cannons+1), (4 + self.rows)//4, tmp + i ) for i in range(self.num_cannons)  ]
         self.cannons = [ Cannon( loc ) for loc in cannon_loc ]
 
-        self.buildings = self.buildings + [ Building((x.x, x.y, x.id), x.width, x.height, x.pixel, x.max_health, x.max_health, x.damage ) for x in self.cannons ]
+        self.buildings = self.buildings + [ x for x in self.cannons ]
+        self.total_buildings = len(self.buildings)
         
         # a 2d array of all the objects in the village
         self.grid = [ [0 for i in range(self.cols)] for j in range(self.rows) ]
@@ -119,11 +122,28 @@ class Vill():
     def rm_build(self, b):
         # remove from grid
         for r in range(b.y, b.y + b.height):
-                    for c in range(b.x, b.x + b.width):
-                        self.village[r][c] = self.bg_color
-                        self.grid[r][c] = 0
+            for c in range(b.x, b.x + b.width):
+                self.village[r][c] = self.bg_color
+                self.grid[r][c] = 0
+            
+            if b.id > self.total_buildings - no_of_cannons:
+                # print(b.id, self.total_buildings - self.num_cannons)
+                for x in self.cannons:
+                    if b.id == x.id:
+                        self.cannons.remove(x)
+
+                self.num_cannons -= 1
         
         self.buildings.remove(b)
+    
+    def rm_troop(self, id):
+        for x in self.troops:
+            if x.id == id:
+                self.troops.remove(x)
+                break
+        
+        if len(self.troops) == 0:
+            self.game_end = -1        
 
     def render(self):
         system('clear')
@@ -138,6 +158,7 @@ class Vill():
         
         # render buildings
         for b in self.buildings:
+            # print(b.id)
             if b.health > 0:
                 for r in range(b.y, b.y + b.height):
                     for c in range(b.x, b.x + b.width):
@@ -175,12 +196,37 @@ class Vill():
                 self.output[j + self.sc_bd_ht + self.border][i + self.border] = self.village[j][i]
 
         # if game has ended
-        if self.game_end == True:
+        if self.game_end != 0:
             game_end_screen_height = 8
             game_end_screen_width = self.cols//2
-            self.game_end_screen = [[self.borders for i in range(game_end_screen_width)] for j in range(game_end_screen_height)]
+            self.game_end_screen = [[wall_pix for i in range(game_end_screen_width)] for j in range(game_end_screen_height)]
+            # game_end_screen_offset = (self.cols - game_end_screen_width) // 2
+
+            # display game over
+            game_over = ""
+            if self.game_end == 1:
+                game_over = game_over + "Victory!"
+            else:
+                game_over = game_over + "You Lose!"
+            game_over_offset = (game_end_screen_width - len(game_over)) // 2
+
+            for j in range(0, len(game_over)):
+                self.game_end_screen[1][game_over_offset+j] = Back.WHITE + Fore.BLACK + Style.BRIGHT + game_over[j] + Style.RESET_ALL
+
+            height_offset = self.sc_bd_ht+((self.rows//2)-(game_end_screen_height//2)+1)
+            width_offset = 2*1+((self.cols//2)-(game_end_screen_width//2))
+            for row in range(0, game_end_screen_height):
+                for col in range(0, game_end_screen_width):
+                    self.output[height_offset+row][width_offset+col] = self.game_end_screen[row][col]
+            
 
         print("\n".join(["".join(row) for row in self.output]))
+
+        if self.game_end ==  0:
+            self.cur_t = time()
+        else:
+            print("Thank you")
+            exit()
         # self.bar_style = self.king.take_damage(10, self)
 
         # print grid
@@ -190,7 +236,3 @@ class Vill():
         # deal damage to buildings
         for c in self.cannons:
             c.deal_damage(self)
-
-
-        if(self.game_end ==  False):
-            self.cur_t = time()
