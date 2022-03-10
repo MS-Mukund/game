@@ -1,4 +1,6 @@
 from colorama import Fore, Back, Style, init
+
+from building import Building
 init()
 
 from os import system
@@ -8,29 +10,31 @@ import random
 
 from input import input_to
 
+from troop import Troop
+
 class King():
     
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        
+        # self.x = x
+        # self.y = y
+
+        pixel = Back.BLUE + Style.BRIGHT + ' ' + Style.RESET_ALL
+        Troop.__init__(self, x, y, 1, 2, 2, 100, 100, pixel)
+
         # dimensions of king cell
-        self.width = 2
-        self.height = 2
+        # self.id = 1
+        # self.width = 2
+        # self.height = 2
 
         # color of king
-        self.pixel = Back.BLUE + Style.BRIGHT + ' ' + Style.RESET_ALL
+        # self.pixel = Back.BLUE + Style.BRIGHT + ' ' + Style.RESET_ALL
 
         # properties of king
-        self.max_health = 100
-        self.health = self.max_health
+        # self.max_health = 100
+        # self.health = self.max_health
 
         self.attack = 10
         self.speed  = 2
-
-    def update_position(self, x, y):
-        self.x = x
-        self.y = y
 
     def v_attack(self, vill):
 
@@ -49,7 +53,26 @@ class King():
                     value = b.reduce_health(self.attack)
                     
                     if value == True:
-                        vill.rm_build(b)                    
+                        vill.rm_build(b)      
+
+    def take_damage(self, amount, vill):
+        # print("yes")
+        Troop.take_damage(self, amount)
+        # print("now")
+        
+        # update health bar color
+        style = Back.GREEN + Fore.BLACK + ' ' + Style.RESET_ALL
+
+        if(self.health <= 0):
+            self.health = 0
+        else:
+            # print("nani " + str(self.health))
+            if   self.health <= self.max_health//2 and self.health > self.max_health//5:
+                vill.bar_style = Back.CYAN + Fore.BLACK + ' ' + Style.RESET_ALL
+            elif self.health <= self.max_health//5:
+                vill.bar_style = Back.RED + Fore.BLACK + ' ' + Style.RESET_ALL
+
+        # print("what")              
         
 
     def move(self, vill):
@@ -111,5 +134,6 @@ class King():
         elif(char == 'q'):
             print('Quitting...')
             exit()
-    
+        
+        # self.update_position(self, self.x, self.y)    
         return char    

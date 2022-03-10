@@ -1,4 +1,6 @@
 from colorama import Fore, Back, Style, init
+
+from building import Building
 init()
 
 from os import system
@@ -6,25 +8,52 @@ from time import sleep, time
 import math
 import random 
 
-import sys
-sys.path.insert(0, './src')
+wid = 1
+ht = 2
+pix = Back.MAGENTA + ' ' + Style.RESET_ALL
+max_h = 50
+h = 50
+dam = 2
+range = 7
 
-class Cannon():
+class Cannon(Building):
     
     def __init__(self, tuple):
-        self.x, self.y = tuple
+        self.x, self.y, self.id = tuple
 
         # dimensions of cannon
-        self.height = 2
-        self.width  = 1
+        self.wid    = wid
+        self.ht     = ht
 
         # color of cannon
-        self.pixel = Back.MAGENTA + ' ' + Style.RESET_ALL
+        self.pixel  = pix
 
         # properties of cannon
-        self.damage = 25
-        self.range  = 7
+        self.damage = dam
+        self.range  = range
+        self.max_h  = max_h
+        self.h      = h
 
-        
+        # self.target = None
+
+        Building.__init__(self, tuple, wid, ht, pix, max_h, h, dam) 
     
+    def deal_damage(self, vill):
+    # targets closest troop in range
 
+        min_d = range + 1
+        index = -1
+        for troop in vill.troops:
+            dist = min( abs(troop.x - self.x), abs(troop.x + troop.width - self.x) ) + min( abs(troop.y - self.y), abs(troop.y + troop.height - self.y) )
+            # print(dist)
+            if(dist < min_d):
+                min_d = dist
+                index = troop.id
+                # print(min_d, index)
+
+        if(index != -1 and index != 1):
+            vill.troops[index-1].take_damage(self.damage)
+        
+        elif index == 1:
+            vill.king.take_damage(self.damage, vill)
+        

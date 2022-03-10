@@ -7,7 +7,7 @@ import math
 import random 
 
 class Building():
-    def __init__(self, tuple, width, height, pixel, max_health, health):
+    def __init__(self, tuple, width, height, pixel, max_health, health, damage):
         self.x, self.y, self.id = tuple
 
         # dimensions
@@ -20,6 +20,8 @@ class Building():
         # properties
         self.max_health = max_health
         self.health = health
+
+        self.damage = damage
 
     def reduce_health(self, amount):
         self.health -= amount
@@ -35,3 +37,5 @@ class Building():
                 self.pixel = Back.RED    + ' ' + Style.RESET_ALL
 
             return False
+
+    

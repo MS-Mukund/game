@@ -1,2 +1,4 @@
 Some notes: 
 1. id for town hall is 1. Id for huts = 2...num_huts. Id for walls starts from num_huts + 2. 
+2. smol bug there on corner of village wall has to be destroyed twice. 
+3. Cannon always attacks the closest hut.
