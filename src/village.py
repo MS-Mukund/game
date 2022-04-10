@@ -163,9 +163,20 @@ class Vill():
             self.game_end = -1        
 
     def render(self):
-        system('clear')
-        self.village = [[self.bg_color for x in range(self.cols)] for y in range(self.rows)]
+        # barbarians move to nearest buildings
+        for troop in self.troops[1:]:
+            # print(self.game_end)
+            self.game_end = troop.move_and_attack(self)
 
+            if self.game_end != 0:
+                break
+
+        for c in self.cannons:
+            c.deal_damage(self)
+
+        system('clear')      
+        self.village = [[self.bg_color for x in range(self.cols)] for y in range(self.rows)]
+        
         # render troops
         for troop in self.troops:
             for r in range(troop.y, troop.y+troop.height):
@@ -258,14 +269,3 @@ class Vill():
         # print grid
         # for row in self.grid:
         #     print(row)
-
-        # barbarians move to nearest buildings
-        for troop in self.troops[1:]:
-            # print(self.game_end)
-            self.game_end = troop.move_and_attack(self)
-
-            if self.game_end != 0:
-                break
-
-        for c in self.cannons:
-            c.deal_damage(self)

@@ -57,8 +57,7 @@ class Troop():
                 self.pixel = Back.LIGHTBLUE_EX + ' ' + Style.RESET_ALL
         # self.pixel = Back.YELLOW + Fore.BLACK + ' ' + Style.RESET_ALL
     
-    def deal_damage(self, vill, b_id):
-            
+    def deal_damage(self, vill, b_id):            
         for b in vill.buildings:
             if b.id == b_id:
                 value = b.reduce_health(self.attack)
@@ -97,9 +96,7 @@ class Troop():
                         if vill.grid[self.y + h][self.x + self.width] != 0:
                             # print('here')
                             # exit()
-                            return self.deal_damage(vill, vill.grid[self.y + h][self.x + self.width])
-                            
-
+                            return self.deal_damage(vill, vill.grid[self.y + h][self.x + self.width])                            
                     self.x += 1
                 else:
                     return 0
