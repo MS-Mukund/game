@@ -147,7 +147,7 @@ class Troop():
             for b in vill.buildings:
                 if b.id > vill.num_huts + 1 + vill.num_wiz:
                     break
-                elif b.id <= vill.num_huts + 1 and ( vill.num_wiz > 0 or len(vill.cannons) > 0 ):
+                elif b.id <= vill.num_huts + 1 and ( len(vill.cannons) > 0 ):
                     continue
                 
                 if abs(self.x - b.x) + abs(self.y - b.y) < m_dist:

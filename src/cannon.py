@@ -44,6 +44,9 @@ class Cannon(Building):
         min_d = range + 1
         index = -1
         for troop in vill.troops:
+            if troop.tr_type == 'ball':
+                continue 
+
             dist = min( abs(troop.x - self.x), abs(troop.x + troop.width - self.x) ) + min( abs(troop.y - self.y), abs(troop.y + troop.height - self.y) )
             # print(dist)
             if(dist < min_d):
