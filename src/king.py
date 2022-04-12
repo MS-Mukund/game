@@ -1,4 +1,5 @@
 from colorama import Fore, Back, Style, init
+from sqlalchemy import false
 
 from building import Building
 init()
@@ -9,7 +10,6 @@ import math
 import random 
 
 from input import input_to
-
 from troop import Troop
 
 class King():
@@ -20,11 +20,12 @@ class King():
         width, height = 2, 2
         max_h = 100
         
+        li_pix = Back.LIGHTBLUE_EX + Style.BRIGHT + ' ' + Style.RESET_ALL
         pixel = Back.BLUE + Style.BRIGHT + ' ' + Style.RESET_ALL
         speed = 2
         attack = 10
         
-        Troop.__init__(self, x, y, id, width, height, max_h, max_h, pixel, speed, attack)
+        Troop.__init__(self, x, y, id, width, height, max_h, max_h, li_pix, pixel, pixel, speed, attack, 'king')
 
     def v_attack(self, vill):
 
@@ -51,9 +52,7 @@ class King():
         return 0    
 
     def take_damage(self, amount, vill):
-        # print("yes")
         Troop.take_damage(self, amount, vill)
-        # print("now")
         
         # update health bar color
         style = Back.GREEN + Fore.BLACK + ' ' + Style.RESET_ALL
@@ -63,19 +62,20 @@ class King():
             vill.bar_style = Back.YELLOW + Fore.YELLOW + ' ' + Style.RESET_ALL
             vill.rm_troop(self.id)
         else:
-            # print("nani " + str(self.health))
             if   self.health <= self.max_health//2 and self.health > self.max_health//5:
                 vill.bar_style = Back.CYAN + Fore.BLACK + ' ' + Style.RESET_ALL
             elif self.health <= self.max_health//5:
                 vill.bar_style = Back.RED + Fore.BLACK + ' ' + Style.RESET_ALL
 
-        # print("what") 
-
     def rage(self, vill):
-        Troop.rage(self, vill)             
+        if self.raged == False:
+            Troop.rage(self, vill)
+            self.raged = True             
         
     def heal(self, vill):
-        Troop.heal(self, vill)
+        if vill.healed == False:
+            Troop.heal(self, vill)
+            vill.healed = True
 
     def move(self, vill):
         char = input_to()
@@ -83,7 +83,6 @@ class King():
             for sp in range(self.speed):
                 if(self.x + self.width < vill.cols):
                     for h in range(self.height):
-                        # print( self.y + h, self.x + self.width)
                         if vill.grid[self.y + h][self.x + self.width] != 0:
                             return
 
@@ -102,7 +101,6 @@ class King():
             #             self.x -= 1
             #         else:
             #             break
-
             for sp in range(self.speed):
                 if self.x > 0:
                     for h in range(self.height):
@@ -125,7 +123,6 @@ class King():
                 if self.y > 0:
                     for w in range(self.width):
                         if vill.grid[self.y - 1][self.x + w] != 0:
-                            # print(w, vill.grid[self.y - 1][self.x + w])
                             return
 
                     self.y -= 1
@@ -151,13 +148,16 @@ class King():
         elif(char == 'h'):
             [ troop.heal(vill) for troop in vill.troops ]
         
-        # spawn troops
-        elif(char == '1'):
-            vill.add_troop(0)
-        elif(char == '2'):
-            vill.add_troop(1)
-        elif(char == '3'):
-            vill.add_troop(2)
+        # spawn barbarians
+        elif char == '1' or char == '2' or char == '3':
+            vill.add_barbs(int(char) - 1)
 
-        # self.update_position(self, self.x, self.y)    
+        # spawn archers 
+        elif char == '4' or char == '5' or char == '6':
+            vill.add_arch(int(char) - 4)
+        
+        # spawn balloons 
+        elif char == '7' or char == '8' or char == '9':
+            vill.add_ball(int(char) - 7)
+
         return char    

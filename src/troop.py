@@ -3,17 +3,15 @@ init()
 
 from os import system
 from time import sleep, time
-import math
-import random 
-
-from input import input_to
 
 class Troop():
     
-    def __init__(self, x, y, id, width, height, max_health, health, pixel, speed, attack):
+    def __init__(self, x, y, id, width, height, max_health, health, li_pix, og_pix, pixel, speed, attack, type):
         self.id = id
         self.x = x
         self.y = y
+
+        self.tr_type = type
 
         self.width = width
         self.height = height
@@ -21,7 +19,10 @@ class Troop():
         self.max_health = max_health
         self.health = health
 
+        self.li_pix = li_pix
+        self.og_pix = og_pix
         self.pixel = pixel
+
         self.speed = speed
         self.attack = attack
 
@@ -37,10 +38,13 @@ class Troop():
         self.health += self.health//2
         if self.health > self.max_health:
             self.health = self.max_health
+        
+        if self.health > self.max_health//2:
+            self.pixel = self.og_pix    # restore original color
 
         if self.id == 1 and  self.health <= self.max_health//2 and self.health > self.max_health//5:
             vill.bar_style = Back.CYAN + ' ' + Style.RESET_ALL
-        elif self.id == 1 and self.health > self.max_health/2:
+        elif self.id == 1 and self.health > self.max_health//2:
             vill.bar_style = Back.GREEN + ' ' + Style.RESET_ALL
 
     def take_damage(self, amount, vill):
@@ -54,7 +58,7 @@ class Troop():
                 vill.rm_troop(self.id)
         else:
             if self.health <= self.max_health//2:
-                self.pixel = Back.LIGHTBLUE_EX + ' ' + Style.RESET_ALL
+                self.pixel = self.li_pix
         # self.pixel = Back.YELLOW + Fore.BLACK + ' ' + Style.RESET_ALL
     
     def deal_damage(self, vill, b_id):            
@@ -71,76 +75,143 @@ class Troop():
         return 0
 
     def move_and_attack(self, vill):
-        m_dist = vill.rows + vill.cols
-        for b in vill.buildings:
-            if b.id > vill.num_huts + 1:
-                break
-            
-            if abs(self.x - b.x) + abs(self.y - b.y) < m_dist:
-                m_dist = abs(self.x - b.x) + abs(self.y - b.y)
-                m_x = b.x
-                m_y = b.y
-            
-        for c in vill.cannons:
-            if abs(self.x - c.x) + abs(self.y - c.y) < m_dist:
-                m_dist = abs(self.x - c.x) + abs(self.y - c.y)
-                m_x = c.x
-                m_y = c.y
-        
-        # right movement
-        if m_x > self.x:           
-            for sp in range(self.speed):
-                if m_x > self.x:
-                    for h in range(self.height):
-                        # print( self.y + h, self.x + self.width)
-                        if vill.grid[self.y + h][self.x + self.width] != 0:
-                            # print('here')
-                            # exit()
-                            return self.deal_damage(vill, vill.grid[self.y + h][self.x + self.width])                            
-                    self.x += 1
-                else:
-                    return 0
-
-            return 0
-
-        # left movement
-        elif m_x < self.x:
-            for sp in range(self.speed):
-                if m_x < self.x:
-                    for h in range(self.height):
-                        if vill.grid[self.y + h][self.x - 1] != 0:
-                            return self.deal_damage(vill, vill.grid[self.y + h][self.x - 1])
-                            
-
-                    self.x -= 1
-                else:
-                    return 0
-            return 0
+        if self.tr_type == 'barb':
+            m_dist = vill.rows + vill.cols
+            for b in vill.buildings:
+                if b.id > vill.num_huts + 1 + vill.num_wiz:
+                    break
                 
+                if abs(self.x - b.x) + abs(self.y - b.y) < m_dist:
+                    m_dist = abs(self.x - b.x) + abs(self.y - b.y)
+                    m_x = b.x
+                    m_y = b.y
 
-        # up movement
-        elif m_y > self.y:
-            for sp in range(self.speed):
-                if m_y > self.y:
-                    for w in range(self.width):
-                        if vill.grid[self.y + self.height][self.x + w] != 0:
-                            return self.deal_damage(vill, vill.grid[self.y + self.height][self.x + w])
-                    self.y += 1
-                else:
-                    return 0
-            return 0
+            for c in vill.cannons:
+                if abs(self.x - c.x) + abs(self.y - c.y) < m_dist:
+                    m_dist = abs(self.x - c.x) + abs(self.y - c.y)
+                    m_x = c.x
+                    m_y = c.y
 
-        # down movement
-        elif m_y < self.y:
-            for sp in range(self.speed):
-                if m_y < self.y:
-                    for w in range(self.width):
-                        if vill.grid[self.y - 1][self.x + w] != 0:
-                            # print('down')
-                            # exit()
-                            return self.deal_damage(vill, vill.grid[self.y - 1][self.x + w])
-                            
-                    self.y -= 1
-                else:
-                    return 0
-            return 0
+            # right movement
+            if m_x > self.x:           
+                for sp in range(self.speed):
+                    if m_x > self.x:
+                        for h in range(self.height):
+                            if vill.grid[self.y + h][self.x + self.width] != 0:
+                                return self.deal_damage(vill, vill.grid[self.y + h][self.x + self.width])                            
+                        self.x += 1
+                    else:
+                        return 0
+
+                return 0
+
+            # left movement
+            elif m_x < self.x:
+                for sp in range(self.speed):
+                    if m_x < self.x:
+                        for h in range(self.height):
+                            if vill.grid[self.y + h][self.x - 1] != 0:
+                                return self.deal_damage(vill, vill.grid[self.y + h][self.x - 1])
+                        self.x -= 1
+                    else:
+                        return 0
+                return 0
+
+            # up movement
+            elif m_y > self.y:
+                for sp in range(self.speed):
+                    if m_y > self.y:
+                        for w in range(self.width):
+                            if vill.grid[self.y + self.height][self.x + w] != 0:
+                                return self.deal_damage(vill, vill.grid[self.y + self.height][self.x + w])
+                        self.y += 1
+                    else:
+                        return 0
+                return 0
+
+            # down movement
+            elif m_y < self.y:
+                for sp in range(self.speed):
+                    if m_y < self.y:
+                        for w in range(self.width):
+                            if vill.grid[self.y - 1][self.x + w] != 0:
+                                return self.deal_damage(vill, vill.grid[self.y - 1][self.x + w])
+                        self.y -= 1
+                    else:
+                        return 0
+                return 0
+
+        else:
+            m_dist = vill.rows + vill.cols
+            tar_id = -1
+            for b in vill.buildings:
+                if b.id > vill.num_huts + 1 + vill.num_wiz:
+                    break
+                elif b.id <= vill.num_huts + 1 and ( vill.num_wiz > 0 or len(vill.cannons) > 0 ):
+                    continue
+                
+                if abs(self.x - b.x) + abs(self.y - b.y) < m_dist:
+                    m_dist = abs(self.x - b.x) + abs(self.y - b.y)
+                    m_x = b.x
+                    m_y = b.y
+                    tar_id = b.id
+
+            for c in vill.cannons:
+                if abs(self.x - c.x) + abs(self.y - c.y) < m_dist:
+                    m_dist = abs(self.x - c.x) + abs(self.y - c.y)
+                    m_x = c.x
+                    m_y = c.y
+                    tar_id = c.id
+            
+            if tar_id == -1:
+                return 0
+
+            # right movement
+            if m_x > self.x:           
+                for sp in range(self.speed):
+                    if m_x > self.x:
+                        for h in range(self.height):
+                            if vill.grid[self.y + h][self.x + self.width] == tar_id:
+                                return self.deal_damage(vill, vill.grid[self.y + h][self.x + self.width])                            
+                        self.x += 1
+                    else:
+                        return 0
+
+                return 0
+
+            # left movement
+            elif m_x < self.x:
+                for sp in range(self.speed):
+                    if m_x < self.x:
+                        for h in range(self.height):
+                            if vill.grid[self.y + h][self.x - 1] == tar_id:
+                                return self.deal_damage(vill, vill.grid[self.y + h][self.x - 1])
+                        self.x -= 1
+                    else:
+                        return 0
+                return 0
+
+
+            # up movement
+            elif m_y > self.y:
+                for sp in range(self.speed):
+                    if m_y > self.y:
+                        for w in range(self.width):
+                            if vill.grid[self.y + self.height][self.x + w] == tar_id:
+                                return self.deal_damage(vill, vill.grid[self.y + self.height][self.x + w])
+                        self.y += 1
+                    else:
+                        return 0
+                return 0
+
+            # down movement
+            elif m_y < self.y:
+                for sp in range(self.speed):
+                    if m_y < self.y:
+                        for w in range(self.width):
+                            if vill.grid[self.y - 1][self.x + w] == tar_id:
+                                return self.deal_damage(vill, vill.grid[self.y - 1][self.x + w])
+                        self.y -= 1
+                    else:
+                        return 0
+                return 0

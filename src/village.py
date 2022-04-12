@@ -19,6 +19,8 @@ from king import King
 from building import Building
 from spawn import Spawn_pt
 from cannon import Cannon
+from archer import Archer
+from troop import Troop
 
 # town hall props
 th_w = 4
@@ -43,10 +45,17 @@ wall_dam = 0
 
 no_of_cannons = 3
 
+# troop props (barbarian)
+tr_att = 4
+tr_sp = 1
+tr_heal = 16
+
+tr_wid = 1
+tr_ht = 1
+
 class Vill():
 
     def __init__(self):
-
         # dimensions of the village
         self.rows = 40
         self.cols = 90
@@ -67,8 +76,14 @@ class Vill():
         # checking end of game
         self.game_end = 0
 
+        self.raged  = False
+        self.healed = False
+
         # troops in general
         self.troops = []
+        self.num_barbs = 6
+        self.num_balloons = 3
+        self.num_archs = 6
 
         # king
         king_loc = ( 4 + 4*(self.cols - 8)//(self.num_spawn_pts+2), 1 )
@@ -87,11 +102,15 @@ class Vill():
         # huts
         self.num_huts = 5
         build_loc = build_loc + [ ( (self.cols - 8)//4, (self.rows + self.sc_bd_ht - 8)//2, 2 ), ( 3*(self.cols)//4, (self.rows + self.sc_bd_ht - 8)//2, 3 ) ]
-
+      
         for i in range(0, self.num_huts - 2):
             build_loc.append( ( (i+1)*(self.cols//(self.num_huts - 1)), 3*(self.rows//4), i + 4 ) ) 
 
         self.buildings = self.buildings + [ Building( loc, hut_w, hut_h, hut_pix, hut_maxh, hut_maxh, hut_dam ) for loc in build_loc[1:] ]
+
+        # wizard_towers 
+        self.num_wiz = 2
+
         
         # walls
         for i in range (4, self.rows - 4 + 1):
@@ -121,20 +140,50 @@ class Vill():
         # renders the village
         self.render()
 
-    def add_troop(self, pt):
+    def add_barbs(self, pt):
+        if self.num_barbs == 0:
+            return
+        self.num_barbs -= 1
+        
         x, y = self.spawn_pts[pt].x, self.spawn_pts[pt].y 
         id = len(self.troops) + 1
 
-        tr_att = 3
-        tr_sp = 1
-        tr_heal = 15
-
-        tr_wid = 1
-        tr_ht = 1
-
         barb_pix = Back.RED + Fore.BLACK + ' ' + Style.RESET_ALL
+        li_pix = Back.LIGHTRED_EX + Fore.BLACK + ' ' + Style.RESET_ALL
 
-        self.troops.append( Troop(x, y, id, tr_wid, tr_ht, tr_heal, tr_heal, barb_pix, tr_att, tr_sp) )
+        self.troops.append( Troop(x, y, id, tr_wid, tr_ht, tr_heal, tr_heal, li_pix, barb_pix, barb_pix, tr_att, tr_sp, 'barb') )
+        if self.raged == True:
+            self.troops[-1].rage()
+
+    def add_arch(self, pt):
+        if self.num_archs == 0:
+            return
+        self.num_archs -= 1
+        
+        x, y = self.spawn_pts[pt].x, self.spawn_pts[pt].y 
+        id = len(self.troops) + 1
+
+        arch_pix = Back.GREEN + Fore.BLACK + ' ' + Style.RESET_ALL
+        li_pix = Back.LIGHTGREEN_EX + Fore.BLACK + ' ' + Style.RESET_ALL
+
+        self.troops.append( Archer(x, y, id, 2*tr_wid, tr_ht, int(tr_heal/2), int(tr_heal/2), li_pix, arch_pix, arch_pix, int(tr_att/2), tr_sp * 2, 'arch') )
+        if self.raged == True:
+            self.troops[-1].rage()
+
+    def add_ball(self, pt):
+        if self.num_balloons == 0:
+            return
+        self.num_balloons -= 1
+        
+        x, y = self.spawn_pts[pt].x, self.spawn_pts[pt].y 
+        id = len(self.troops) + 1
+
+        ball_pix = Back.YELLOW + Fore.BLACK + ' ' + Style.RESET_ALL
+        li_pix = Back.LIGHTYELLOW_EX + Fore.BLACK + ' ' + Style.RESET_ALL
+
+        self.troops.append( Troop(x, y, id, 3*tr_wid, tr_ht, int(tr_heal/2), int(tr_heal/2), li_pix, ball_pix, ball_pix, int(tr_att/2), tr_sp * 2, 'ball') )
+        if self.raged == True:
+            self.troops[-1].rage()
 
     def rm_build(self, b):
         # remove from grid
@@ -165,8 +214,10 @@ class Vill():
     def render(self):
         # barbarians move to nearest buildings
         for troop in self.troops[1:]:
-            # print(self.game_end)
-            self.game_end = troop.move_and_attack(self)
+            if troop.tr_type != 'arch':
+                self.game_end = troop.move_and_attack(self)
+            else:
+                self.game_end = troop.move_and_attack(self)
 
             if self.game_end != 0:
                 break
@@ -264,8 +315,4 @@ class Vill():
         else:
             print("Thank you")
             exit()
-        # self.bar_style = self.king.take_damage(10, self)
-
-        # print grid
-        # for row in self.grid:
-        #     print(row)
+        
