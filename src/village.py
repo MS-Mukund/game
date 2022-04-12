@@ -76,8 +76,12 @@ class Vill():
         # checking end of game
         self.game_end = 0
 
+        # spells 
         self.raged  = False
         self.healed = False
+
+        # levels 
+        self.level = 1 
 
         # troops in general
         self.troops = []
@@ -257,16 +261,22 @@ class Vill():
         for j in range(0, len(title)):
             self.output[1][title_offset+j] = Back.YELLOW + Fore.BLACK + Style.BRIGHT + title[j] + Style.RESET_ALL
 
+        # display level
+        title = "Level 1"
+        title_offset = (self.cols+self.border-len(title)) // 2
+        for j in range(0, len(title)):
+            self.output[2][title_offset+j] = Back.YELLOW + Fore.BLACK + Style.BRIGHT + title[j] + Style.RESET_ALL
+
         # display king's health bar
         health_bar = "Health: "
         health_bar_offset = (self.cols+self.border-len(health_bar)) // 4
         for j in range(0, len(health_bar)):
-            self.output[3][health_bar_offset+j] = Back.YELLOW + Fore.BLACK + Style.BRIGHT + health_bar[j] + Style.RESET_ALL
+            self.output[4][health_bar_offset+j] = Back.YELLOW + Fore.BLACK + Style.BRIGHT + health_bar[j] + Style.RESET_ALL
         
         # display king's health
         health_offset = health_bar_offset + len(health_bar)
         for j in range(0, self.king.health//2):
-            self.output[3][health_offset+j] = self.bar_style
+            self.output[4][health_offset+j] = self.bar_style
                 
         # render the village excluding the borders + score board
         for j in range(0, self.rows):
