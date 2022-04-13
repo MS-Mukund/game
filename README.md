@@ -21,3 +21,6 @@
 
 14. `python main.py` to run the game. 
 15. `python replay.py` to replay the game. You will be asked to input the n_th previous game to replay. 1 is the most recent game. 
+
+// prev_move = 1, up or down - archer queen
+// prev_move = 2, left or right - archer queen

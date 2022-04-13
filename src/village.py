@@ -64,6 +64,9 @@ class Vill():
         self.num_spawn_pts = 3
         self.number_of_files = len( os.listdir('replays') )
 
+        # king or queen?
+        self.is_king = -1
+
         self.bar_style = Back.GREEN + Fore.BLACK + Style.BRIGHT + ' ' + Style.RESET_ALL
         # basic timekeeping
         self.start_t = time()
@@ -89,9 +92,12 @@ class Vill():
         self.num_balloons = 3
         self.num_archs = 6
 
+        # previous move for queen 
+        self.prev_move = -1
+
         # king
         king_loc = ( 4 + 4*(self.cols - 8)//(self.num_spawn_pts+2), 1 )
-        self.king = King(king_loc[0], king_loc[1])
+        self.king = King(king_loc[0], king_loc[1], 'king')
         self.health_bar = self.king.max_health      # king's health bar
         self.troops.append( self.king )# king_loc[0], king_loc[1], self.king.id, self.king.width, self.king.height, self.king.max_health, self.king.max_health, self.king.pixel ) )
 
@@ -114,7 +120,6 @@ class Vill():
 
         # wizard_towers 
         self.num_wiz = 2
-
         
         # walls
         for i in range (4, self.rows - 4 + 1):
@@ -283,8 +288,24 @@ class Vill():
             for i in range(0, self.cols):
                 self.output[j + self.sc_bd_ht + self.border][i + self.border] = self.village[j][i]
 
+        if self.is_king == -1:
+            game_end_screen_height = 8
+            game_end_screen_width = self.cols//2
+            self.game_end_screen = [[wall_pix for i in range(game_end_screen_width)] for j in range(game_end_screen_height)]
+            choose_q = "Press Q to choose the Queen"
+            game_over_offset = (game_end_screen_width - len(choose_q)) // 2
+
+            for j in range(0, len(choose_q)):
+                self.game_end_screen[1][game_over_offset+j] = Back.WHITE + Fore.BLACK + Style.BRIGHT + choose_q[j] + Style.RESET_ALL
+            
+            height_offset = self.sc_bd_ht+((self.rows//2)-(game_end_screen_height//2)+1)
+            width_offset = 2*1+((self.cols//2)-(game_end_screen_width//2))
+            for row in range(0, game_end_screen_height):
+                for col in range(0, game_end_screen_width):
+                    self.output[height_offset+row][width_offset+col] = self.game_end_screen[row][col]
+            
         # if game has ended
-        if self.game_end != 0:
+        elif self.game_end != 0:
             game_end_screen_height = 8
             game_end_screen_width = self.cols//2
             self.game_end_screen = [[wall_pix for i in range(game_end_screen_width)] for j in range(game_end_screen_height)]

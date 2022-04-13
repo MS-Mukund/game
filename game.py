@@ -20,7 +20,7 @@ while( True ):
         break
     
     while True:
-        if clock() - start > 0.2:
+        if clock() - start > 0.1:
             break
 
 os.system('stty echo')

@@ -19,7 +19,7 @@ if num > number_of_files:
 with open( replay_f, "r") as replay:
     for line in replay:
         if line.strip() == "demarcation":
-            sleep(0.1)
+            sleep(0.3)
             system('clear')
         else:
             print(line, end="")
